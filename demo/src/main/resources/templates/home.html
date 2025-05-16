@@ -6,6 +6,7 @@
 </head>
 <body>
     <h2>Welcome to the Home Page!</h2>
+    <p>hello, <span th:text="${username}"></span>!</p>
     <form th:action="@{/logout}" method="post">
         <button type="submit">Logout</button>
     </form>

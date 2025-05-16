@@ -3,7 +3,9 @@ package com.example.demo.controller;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,8 +30,12 @@ public class AuthController {
     }
 
     @GetMapping("/home")
-    public String home() {
-        return "home"; // Página principal después del login
+    public String home(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        String username = userDetails.getUsername();
+        model.addAttribute("username", username);
+
+        System.out.println("Usuario autenticado: " + username);
+        return "home";
     }
 
     @GetMapping("/register")
