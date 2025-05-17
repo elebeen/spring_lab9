@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import lombok.Data;
+import java.util.List;
 import jakarta.persistence.*;
 
 @Entity
@@ -19,4 +20,7 @@ public class User {
 
     @Column(nullable = false)
     private String role; // Ejemplo: "USER" o "ADMIN"
+
+    @OneToMany(mappedBy = "user")
+    private List<Product> products;
 }
