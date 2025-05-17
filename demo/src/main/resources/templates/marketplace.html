@@ -3,86 +3,137 @@
 <head>
     <meta charset="UTF-8" />
     <title>Marketplace</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
+    <style>
+        .hero-title {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .hero-title span {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+        .filters-card {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .product-table {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .no-products {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+        .nav-link-custom {
+            transition: all 0.3s ease;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-light">
+    <div class="container py-4">
+        <nav class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="hero-title text-center">Descubre productos de otros <span>mundos</span></h1>
+                <div class="d-flex">
+                    <a th:href="@{/home}"
+                       class="nav-link-custom btn me-3"
+                       th:classappend="${requestURI == '/home'} ? 'btn-primary' : 'btn-outline-primary'">
+                        <i class="fas fa-home me-2"></i>Inicio
+                    </a>
+                    <a th:href="@{/market}"
+                       class="nav-link-custom btn"
+                       th:classappend="${requestURI == '/market'} ? 'btn-success' : 'btn-outline-success'">
+                        <i class="fas fa-store me-2"></i>Marketplace
+                    </a>
+                </div>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+                </button>
+            </form>
+        </nav>
 
-<header>
-    <nav style="margin-bottom: 1.5em;">
-        <h1>Descubre productos de otros<span>mundos</span> </h1>
-        <a th:href="@{/home}"
-        th:classappend="${requestURI == '/home'} ? 'active' : ''"
-        style="text-decoration:none; padding: 0.5em 1em; border-radius:4px; margin-right:1em; font-weight:600; color:white;"
-        th:style="${requestURI == '/home'} ? 'background-color:#1976D2;' : 'background-color:#2196F3;'">
-            Inicio
-        </a>
-        <a th:href="@{/market}"
-        th:classappend="${requestURI == '/market'} ? 'active' : ''"
-        style="text-decoration:none; padding: 0.5em 1em; border-radius:4px; font-weight:600; color:white;"
-        th:style="${requestURI == '/market'} ? 'background-color:#388E3C;' : 'background-color:#4CAF50;'">
-            Marketplace
-        </a>
-    </nav>
+        <div class="row">
+            <aside class="col-md-3">
+                <div class="filters-card sticky-top" style="top: 20px;">
+                    <h2 class="h4 mb-4"><i class="fas fa-filter me-2"></i>Filtros</h2>
+                    <form th:action="@{/market/search}" method="get" class="mb-3">
+                        <div class="mb-3">
+                            <input type="text" 
+                                   name="name" 
+                                   class="form-control" 
+                                   placeholder="Buscar por nombre..."
+                                   th:value="${searchTerm}">
+                        </div>
+                        <div class="mb-3">
+                            <select name="categoryId" class="form-select">
+                                <option value="">Todas las categorías</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat.id}"
+                                        th:text="${cat.name}"
+                                        th:selected="${cat.id == selectedCategoryId}">
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Buscar
+                        </button>
+                    </form>
+                    <form th:action="@{/market}" method="get">
+                        <button type="submit" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-broom me-2"></i>Limpiar filtros
+                        </button>
+                    </form>
+                </div>
+            </aside>
 
-</header>
+            <main class="col-md-9">
+                <div class="card product-table">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th><i class="fas fa-tag me-2"></i>Nombre</th>
+                                        <th><i class="fas fa-align-left me-2"></i>Descripción</th>
+                                        <th><i class="fas fa-dollar-sign me-2"></i>Precio</th>
+                                        <th><i class="fas fa-list me-2"></i>Categoría</th>
+                                        <th><i class="fas fa-boxes me-2"></i>Stock</th>
+                                        <th><i class="fas fa-user me-2"></i>Vendido por</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="product : ${products}">
+                                        <td th:text="${product.name}">Nombre</td>
+                                        <td th:text="${product.description}">Descripción</td>
+                                        <td th:text="${'$' + #numbers.formatDecimal(product.price, 1, 2)}">Precio</td>
+                                        <td th:text="${product.category.name}">Categoría</td>
+                                        <td th:text="${product.stockQuantity}">Stock</td>
+                                        <td th:text="${product.user.username}">Vendido por</td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(products)}">
+                                        <td colspan="6" class="no-products">
+                                            <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+                                            <p class="h5">No hay productos disponibles para mostrar.</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
 
-<div class="container">
-
-    <aside class="filters">
-        <h2>Filtros</h2>
-        <form th:action="@{/market/search}" method="get">
-            <input
-                type="text"
-                name="name"
-                placeholder="Buscar por nombre..."
-                th:value="${searchTerm}" />
-            <select name="categoryId" >
-                <option value="">Todas las categorías</option>
-                <option th:each="cat : ${categories}"
-                        th:value="${cat.id}"
-                        th:text="${cat.name}"
-                        th:selected="${cat.id == selectedCategoryId}">
-                </option>
-            </select>
-            <button type="submit">Buscar</button>
-        </form>
-        <form th:action="@{/market}" method="get" style="margin-top: 1em;">
-            <button type="submit" class="clear-btn">Limpiar filtros</button>
-        </form>
-    </aside>
-
-    <main class="products">
-        <a th:href="@{/home/create}" class="add-product-btn">
-            <i class="fas fa-plus"></i> Añadir producto
-        </a>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Categoría</th>
-                    <th>Stock</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="product : ${products}">
-                    <td th:text="${product.name}">Nombre</td>
-                    <td th:text="${product.description}">Descripción</td>
-                    <td th:text="${product.price}">Precio</td>
-                    <td th:text="${product.category.name}">Categoría</td>
-                    <td th:text="${product.stockQuantity}">Stock</td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(products)}">
-                    <td colspan="5" class="no-products">No hay productos disponibles para mostrar.</td>
-                </tr>
-            </tbody>
-        </table>
-    </main>
-
-</div>
-
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

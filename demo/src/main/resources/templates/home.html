@@ -2,134 +2,227 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Inicio</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 2em; background-color: #f4f4f4; }
-        h1 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1em; background: white; }
-        th, td { padding: 0.8em; border: 1px solid #ccc; text-align: left; }
-        th { background-color: #e8e8e8; }
-        a, button { padding: 0.5em 1em; margin-right: 0.5em; text-decoration: none; border: none; border-radius: 4px; }
-        .edit { background-color: #4CAF50; color: white; }
-        .delete { background-color: #f44336; color: white; }
-        .add { background-color: #2196F3; color: white; float: right; margin-bottom: 1em; }
-    </style>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</head>
-<div id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
-    background: rgba(0, 0, 0, 0.5); justify-content:center; align-items:center;">
-    <div style="background:white; padding:2em; border-radius:8px; width:300px; text-align:center;">
-        <p>¿Estás seguro de que deseas eliminar este producto?</p>
-        <button onclick="confirmDelete()" style="background-color:#f44336; color:white; padding:0.5em 1em; border:none; border-radius:4px;">Sí, eliminar</button>
-        <button onclick="closeModal()" style="margin-left:1em; padding:0.5em 1em;">Cancelar</button>
-    </div>
-</div>
-<script>
-    let formToSubmit = null;
-
-    function showModal(form) {
-        formToSubmit = form;
-        document.getElementById('confirmModal').style.display = 'flex';
-    }
-
-    function closeModal() {
-        formToSubmit = null;
-        document.getElementById('confirmModal').style.display = 'none';
-    }
-
-    function confirmDelete() {
-        if (formToSubmit) {
-            formToSubmit.submit();
+    <style>
+        body {
+            background-color: #f8f9fa;
         }
-    }
-</script>
+        .hero-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .hero-title span {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+        .filters-card {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .product-table {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .no-products {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+        .nav-link-custom {
+            transition: all 0.3s ease;
+        }
+        .icon-button {
+            background: none;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            color: #6c757d;
+            transition: color 0.2s;
+        }
+        .icon-button:hover {
+            color: #0d6efd;
+        }
+        .icon-button.delete:hover {
+            color: #dc3545;
+        }
+        .add-product-btn {
+            margin-bottom: 1.5rem;
+        }
+        /* Modal de confirmación */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+        .confirm-modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+    </style>
+</head>
 <body>
-    <nav style="margin-bottom: 1.5em;">
-        <h1>Bienvenido, <span th:text="${username}">Usuario</span></h1>
-        <a th:href="@{/home}"
-        th:classappend="${requestURI == '/home'} ? 'active' : ''"
-        style="text-decoration:none; padding: 0.5em 1em; border-radius:4px; margin-right:1em; font-weight:600; color:white;"
-        th:style="${requestURI == '/home'} ? 'background-color:#1976D2;' : 'background-color:#2196F3;'">
-            Inicio
-        </a>
-        <a th:href="@{/market}"
-        th:classappend="${requestURI == '/market'} ? 'active' : ''"
-        style="text-decoration:none; padding: 0.5em 1em; border-radius:4px; font-weight:600; color:white;"
-        th:style="${requestURI == '/market'} ? 'background-color:#388E3C;' : 'background-color:#4CAF50;'">
-            Marketplace
-        </a>
-    </nav>
-
-
-    <div style="display: flex; gap: 2rem; margin-top: 2em;">
-
-        <!-- 🧭 Sidebar de filtros -->
-        <aside style="width: 250px; background-color: #fff; padding: 1em; border: 1px solid #ccc; border-radius: 8px;">
-            <form th:action="@{/home/search}" method="get" style="display: flex; flex-direction: column; gap: 1rem;">
-                <input type="text" name="name" placeholder="Buscar por nombre"
-                       th:value="${searchTerm}" style="padding: 0.5em;">
-
-                <select name="categoryId" style="padding: 0.5em;">
-                    <option value="">Todas las categorías</option>
-                    <option th:each="cat : ${categories}"
-                            th:value="${cat.id}"
-                            th:text="${cat.name}"
-                            th:selected="${cat.id == selectedCategoryId}">
-                    </option>
-                </select>
-
-                <button type="submit" style="padding: 0.5em; background-color: #4CAF50; color: white; border: none; border-radius: 4px;">
-                    Buscar
-                </button>
-
-                <a th:href="@{/home}" style="padding: 0.5em; text-align: center; background-color: #9E9E9E; color: white; border-radius: 4px;">
-                    Limpiar filtros
-                </a>
-            </form>
-        </aside>
-
-        <!-- 🎯 Contenido principal -->
-        <main style="flex: 1;">
-            <a th:href="@{/home/create}" class="add" style="margin-bottom: 1em; display: inline-block;">+ Añadir producto</a>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Precio</th>
-                        <th>Categoría</th>
-                        <th>Stock</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="product : ${products}">
-                        <td th:text="${product.name}">Nombre</td>
-                        <td th:text="${product.description}">Descripción</td>
-                        <td th:text="${product.price}">Precio</td>
-                        <td th:text="${product.category.name}">Categoría</td>
-                        <td th:text="${product.stockQuantity}">Stock</td>
-                        <td>
-                            <a th:href="@{/home/edit/{id}(id=${product.id})}" class="icon-button edit" title="Editar">
-                                <i class="fas fa-pen"></i>
-                            </a>
-
-                            <form th:action="@{/home/delete/{id}(id=${product.id})}" method="post"
-                                th:id="'deleteForm-' + ${product.id}" style="display:inline;">
-                                <button type="button" class="icon-button delete" th:onclick="'showModal(this.form)'" title="Eliminar">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(products)}">
-                        <td colspan="6" style="text-align: center;">No tienes productos registrados aún.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </main>
-
+    <!-- Modal de confirmación -->
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-modal-content">
+            <p class="h5 mb-4">¿Estás seguro de que deseas eliminar este producto?</p>
+            <button onclick="confirmDelete()" class="btn btn-danger me-3">
+                <i class="fas fa-trash me-2"></i>Sí, eliminar
+            </button>
+            <button onclick="closeModal()" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-2"></i>Cancelar
+            </button>
+        </div>
     </div>
+
+    <script>
+        let formToSubmit = null;
+
+        function showModal(form) {
+            formToSubmit = form;
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            formToSubmit = null;
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        function confirmDelete() {
+            if (formToSubmit) {
+                formToSubmit.submit();
+            }
+        }
+    </script>
+
+    <div class="container py-4">
+        <!-- Barra de navegación -->
+        <nav class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="hero-title">Bienvenido, <span th:text="${username}">Usuario</span></h1>
+                <div class="d-flex">
+                    <a th:href="@{/home}"
+                       class="nav-link-custom btn me-3"
+                       th:classappend="${requestURI == '/home'} ? 'btn-primary' : 'btn-outline-primary'">
+                        <i class="fas fa-home me-2"></i>Inicio
+                    </a>
+                    <a th:href="@{/market}"
+                       class="nav-link-custom btn"
+                       th:classappend="${requestURI == '/market'} ? 'btn-success' : 'btn-outline-success'">
+                        <i class="fas fa-store me-2"></i>Marketplace
+                    </a>
+                </div>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+                </button>
+            </form>
+        </nav>
+
+        <div class="row">
+            <!-- Sidebar de filtros -->
+            <aside class="col-md-3">
+                <div class="filters-card sticky-top" style="top: 20px;">
+                    <h2 class="h4 mb-4"><i class="fas fa-filter me-2"></i>Filtros</h2>
+                    <form th:action="@{/home/search}" method="get" class="mb-3">
+                        <div class="mb-3">
+                            <input type="text" 
+                                   name="name" 
+                                   class="form-control" 
+                                   placeholder="Buscar por nombre"
+                                   th:value="${searchTerm}">
+                        </div>
+                        <div class="mb-3">
+                            <select name="categoryId" class="form-select">
+                                <option value="">Todas las categorías</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat.id}"
+                                        th:text="${cat.name}"
+                                        th:selected="${cat.id == selectedCategoryId}">
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                            <i class="fas fa-search me-2"></i>Buscar
+                        </button>
+                        <a th:href="@{/home}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-broom me-2"></i>Limpiar filtros
+                        </a>
+                    </form>
+                </div>
+            </aside>
+
+            <!-- Contenido principal -->
+            <main class="col-md-9">
+                <a th:href="@{/home/create}" class="btn btn-success add-product-btn">
+                    <i class="fas fa-plus me-2"></i>Añadir producto
+                </a>
+
+                <div class="card product-table">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th><i class="fas fa-tag me-2"></i>Nombre</th>
+                                        <th><i class="fas fa-align-left me-2"></i>Descripción</th>
+                                        <th><i class="fas fa-dollar-sign me-2"></i>Precio</th>
+                                        <th><i class="fas fa-list me-2"></i>Categoría</th>
+                                        <th><i class="fas fa-boxes me-2"></i>Stock</th>
+                                        <th><i class="fas fa-cog me-2"></i>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="product : ${products}">
+                                        <td th:text="${product.name}">Nombre</td>
+                                        <td th:text="${product.description}">Descripción</td>
+                                        <td th:text="${'$' + #numbers.formatDecimal(product.price, 1, 2)}">Precio</td>
+                                        <td th:text="${product.category.name}">Categoría</td>
+                                        <td th:text="${product.stockQuantity}">Stock</td>
+                                        <td>
+                                            <a th:href="@{/home/edit/{id}(id=${product.id})}" class="icon-button edit" title="Editar">
+                                                <i class="fas fa-pen"></i>
+                                            </a>
+                                            <form th:action="@{/home/delete/{id}(id=${product.id})}" method="post"
+                                                th:id="'deleteForm-' + ${product.id}" style="display:inline;">
+                                                <button type="button" class="icon-button delete" th:onclick="'showModal(this.form)'" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(products)}">
+                                        <td colspan="6" class="no-products">
+                                            <i class="fas fa-box-open fa-2x mb-3"></i>
+                                            <p class="h5">No tienes productos registrados aún.</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
