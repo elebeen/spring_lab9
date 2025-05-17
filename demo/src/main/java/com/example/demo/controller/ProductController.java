@@ -34,7 +34,11 @@ public class ProductController {
 
     // Mostrar todos los productos del usuario autenticado
     @GetMapping
-    public String listUserProducts(Model model, @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) {
+    public String listUserProducts(
+        Model model, 
+        @AuthenticationPrincipal UserDetails userDetails, 
+        HttpServletRequest request
+    ) {
         Long userId = userService.findByUsername(userDetails.getUsername()).getId();
         List<Product> products = productService.getProductsByUser(userId);
         String username = userDetails.getUsername();
@@ -110,10 +114,12 @@ public class ProductController {
 
     // Buscar productos (por nombre, categoría o ambos)
     @GetMapping("/search")
-    public String searchProducts(@RequestParam(required = false) String name,
-                                 @RequestParam(required = false) Long categoryId,
-                                 Model model,
-                                 @AuthenticationPrincipal UserDetails userDetails) {
+    public String searchProducts(
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) Long categoryId,
+        Model model,
+        @AuthenticationPrincipal UserDetails userDetails
+    ) {
         Long userId = userService.findByUsername(userDetails.getUsername()).getId();
         Category category = categoryId != null ? categoryRepository.findById(categoryId).orElse(null) : null;
         List<Product> products;
