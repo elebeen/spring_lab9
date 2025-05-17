@@ -1,11 +1,7 @@
 package com.example.demo.model;
 
 import lombok.Data;
-
 import java.util.List;
-
-import org.springframework.security.access.method.P;
-
 import jakarta.persistence.*;
 
 @Entity
