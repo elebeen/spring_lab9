@@ -44,46 +44,92 @@
     }
 </script>
 <body>
+    <nav style="margin-bottom: 1.5em;">
+        <h1>Bienvenido, <span th:text="${username}">Usuario</span></h1>
+        <a th:href="@{/home}"
+        th:classappend="${requestURI == '/home'} ? 'active' : ''"
+        style="text-decoration:none; padding: 0.5em 1em; border-radius:4px; margin-right:1em; font-weight:600; color:white;"
+        th:style="${requestURI == '/home'} ? 'background-color:#1976D2;' : 'background-color:#2196F3;'">
+            Inicio
+        </a>
+        <a th:href="@{/market}"
+        th:classappend="${requestURI == '/market'} ? 'active' : ''"
+        style="text-decoration:none; padding: 0.5em 1em; border-radius:4px; font-weight:600; color:white;"
+        th:style="${requestURI == '/market'} ? 'background-color:#388E3C;' : 'background-color:#4CAF50;'">
+            Marketplace
+        </a>
+    </nav>
 
-    <h1>Bienvenido, <span th:text="${username}">Usuario</span></h1>
 
-    <a th:href="@{/home/create}" class="add">+ Añadir producto</a>
+    <div style="display: flex; gap: 2rem; margin-top: 2em;">
 
-    <table>
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Categoría</th>
-                <th>Stock</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="product : ${products}">
-                <td th:text="${product.name}">Nombre</td>
-                <td th:text="${product.description}">Descripción</td>
-                <td th:text="${product.price}">Precio</td>
-                <td th:text="${product.category.name}">Categoría</td>
-                <td th:text="${product.stockQuantity}">Stock</td>
-                <td>
-                    <a th:href="@{/home/edit/{id}(id=${product.id})}" class="icon-button edit" title="Editar">
-                        <i class="fas fa-pen"></i>
-                    </a>
+        <!-- 🧭 Sidebar de filtros -->
+        <aside style="width: 250px; background-color: #fff; padding: 1em; border: 1px solid #ccc; border-radius: 8px;">
+            <form th:action="@{/home/search}" method="get" style="display: flex; flex-direction: column; gap: 1rem;">
+                <input type="text" name="name" placeholder="Buscar por nombre"
+                       th:value="${searchTerm}" style="padding: 0.5em;">
 
-                    <form th:action="@{/home/delete/{id}(id=${product.id})}" method="post"
-                        th:id="'deleteForm-' + ${product.id}" style="display:inline;">
-                        <button type="button" class="icon-button delete" th:onclick="'showModal(this.form)'" title="Eliminar">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(products)}">
-                <td colspan="6" style="text-align: center;">No tienes productos registrados aún.</td>
-            </tr>
-        </tbody>
-    </table>
+                <select name="categoryId" style="padding: 0.5em;">
+                    <option value="">Todas las categorías</option>
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat.id}"
+                            th:text="${cat.name}"
+                            th:selected="${cat.id == selectedCategoryId}">
+                    </option>
+                </select>
+
+                <button type="submit" style="padding: 0.5em; background-color: #4CAF50; color: white; border: none; border-radius: 4px;">
+                    Buscar
+                </button>
+
+                <a th:href="@{/home}" style="padding: 0.5em; text-align: center; background-color: #9E9E9E; color: white; border-radius: 4px;">
+                    Limpiar filtros
+                </a>
+            </form>
+        </aside>
+
+        <!-- 🎯 Contenido principal -->
+        <main style="flex: 1;">
+            <a th:href="@{/home/create}" class="add" style="margin-bottom: 1em; display: inline-block;">+ Añadir producto</a>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th>Categoría</th>
+                        <th>Stock</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="product : ${products}">
+                        <td th:text="${product.name}">Nombre</td>
+                        <td th:text="${product.description}">Descripción</td>
+                        <td th:text="${product.price}">Precio</td>
+                        <td th:text="${product.category.name}">Categoría</td>
+                        <td th:text="${product.stockQuantity}">Stock</td>
+                        <td>
+                            <a th:href="@{/home/edit/{id}(id=${product.id})}" class="icon-button edit" title="Editar">
+                                <i class="fas fa-pen"></i>
+                            </a>
+
+                            <form th:action="@{/home/delete/{id}(id=${product.id})}" method="post"
+                                th:id="'deleteForm-' + ${product.id}" style="display:inline;">
+                                <button type="button" class="icon-button delete" th:onclick="'showModal(this.form)'" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(products)}">
+                        <td colspan="6" style="text-align: center;">No tienes productos registrados aún.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+
+    </div>
 </body>
 </html>

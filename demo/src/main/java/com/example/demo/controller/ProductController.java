@@ -20,6 +20,7 @@ import com.example.demo.repository.CategoryRepository;
 import com.example.demo.service.ProductService;
 import com.example.demo.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -33,13 +34,16 @@ public class ProductController {
 
     // Mostrar todos los productos del usuario autenticado
     @GetMapping
-    public String listUserProducts(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String listUserProducts(Model model, @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) {
         Long userId = userService.findByUsername(userDetails.getUsername()).getId();
         List<Product> products = productService.getProductsByUser(userId);
         String username = userDetails.getUsername();
+        List<Category> categories = categoryRepository.findAll();
 
         model.addAttribute("products", products);
         model.addAttribute("username", username);
+        model.addAttribute("categories", categories);
+        model.addAttribute("requestURI", request.getRequestURI());
         return "home";
     }
 
@@ -125,10 +129,11 @@ public class ProductController {
         }
 
         model.addAttribute("products", products);
-        model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("selectedCategoryId", categoryId);
         model.addAttribute("searchTerm", name);
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("username", userDetails.getUsername());
 
-        return "home/list";
+        return "home";
     }
 }

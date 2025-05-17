@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Marketplace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+</head>
+<body>
+
+<header>
+    <nav style="margin-bottom: 1.5em;">
+        <h1>Descubre productos de otros<span>mundos</span> </h1>
+        <a th:href="@{/home}"
+        th:classappend="${requestURI == '/home'} ? 'active' : ''"
+        style="text-decoration:none; padding: 0.5em 1em; border-radius:4px; margin-right:1em; font-weight:600; color:white;"
+        th:style="${requestURI == '/home'} ? 'background-color:#1976D2;' : 'background-color:#2196F3;'">
+            Inicio
+        </a>
+        <a th:href="@{/market}"
+        th:classappend="${requestURI == '/market'} ? 'active' : ''"
+        style="text-decoration:none; padding: 0.5em 1em; border-radius:4px; font-weight:600; color:white;"
+        th:style="${requestURI == '/market'} ? 'background-color:#388E3C;' : 'background-color:#4CAF50;'">
+            Marketplace
+        </a>
+    </nav>
+
+</header>
+
+<div class="container">
+
+    <aside class="filters">
+        <h2>Filtros</h2>
+        <form th:action="@{/market/search}" method="get">
+            <input
+                type="text"
+                name="name"
+                placeholder="Buscar por nombre..."
+                th:value="${searchTerm}" />
+            <select name="categoryId" >
+                <option value="">Todas las categorías</option>
+                <option th:each="cat : ${categories}"
+                        th:value="${cat.id}"
+                        th:text="${cat.name}"
+                        th:selected="${cat.id == selectedCategoryId}">
+                </option>
+            </select>
+            <button type="submit">Buscar</button>
+        </form>
+        <form th:action="@{/market}" method="get" style="margin-top: 1em;">
+            <button type="submit" class="clear-btn">Limpiar filtros</button>
+        </form>
+    </aside>
+
+    <main class="products">
+        <a th:href="@{/home/create}" class="add-product-btn">
+            <i class="fas fa-plus"></i> Añadir producto
+        </a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Categoría</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.name}">Nombre</td>
+                    <td th:text="${product.description}">Descripción</td>
+                    <td th:text="${product.price}">Precio</td>
+                    <td th:text="${product.category.name}">Categoría</td>
+                    <td th:text="${product.stockQuantity}">Stock</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(products)}">
+                    <td colspan="5" class="no-products">No hay productos disponibles para mostrar.</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+</div>
+
+</body>
+</html>
