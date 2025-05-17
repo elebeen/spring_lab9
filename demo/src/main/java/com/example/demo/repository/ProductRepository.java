@@ -10,11 +10,12 @@ import com.example.demo.model.Product;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     // Aquí puedes agregar métodos personalizados si es necesario
     // Por ejemplo, buscar productos por nombre o categoría
-    List<Product> findByNameContaining(String name);
-    List<Product> findByCategory(Category category);
+    List<Product> findProductByNameContaining(String name);
+    List<Product> findProductByCategory(Category category);
     Optional<Product> findProductById(Long id);
 
-    void addProduct(Product product, Long userId);
-    void deleteProductById(Long id);
-    void updateProduct(Product product, Long id);
+    List<Product> findProductByUserId(Long userId);
+    List<Product> findProductByUserIdAndCategory(Long userId, Category category);
+    List<Product> findProductByUserIdAndNameContaining(Long userId, String name);
+    List<Product> findProductByUserIdAndCategoryAndNameContaining(Long userId, Category category, String name);
 }

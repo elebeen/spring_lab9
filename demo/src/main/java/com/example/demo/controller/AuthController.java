@@ -19,6 +19,7 @@ import com.example.demo.service.UserRegistrationService;
 public class AuthController {
     private final UserRegistrationService registrationService;
     private final AuthenticationManager authenticationManager;
+    
     public AuthController(UserRegistrationService registrationService, AuthenticationManager authenticationManager) {
         this.registrationService = registrationService;
         this.authenticationManager = authenticationManager;
@@ -27,15 +28,6 @@ public class AuthController {
     @GetMapping("/login")
     public String login() {
         return "login"; // Nombre de la plantilla Thymeleaf o JSP
-    }
-
-    @GetMapping("/home")
-    public String home(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        String username = userDetails.getUsername();
-        model.addAttribute("username", username);
-
-        System.out.println("Usuario autenticado: " + username);
-        return "home";
     }
 
     @GetMapping("/register")
@@ -63,5 +55,4 @@ public class AuthController {
             return "register";
         }
     }
-
 }
